@@ -1,0 +1,5 @@
+.idea/
+.task/
+build/
+local/
+dist/
