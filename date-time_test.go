@@ -3,10 +3,11 @@ package rfc3339
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDateTime_IsDateTimeString(t *testing.T) {
@@ -174,5 +175,48 @@ func TestDateTime_UnmarshalJSON(t *testing.T) {
 			"2023-04-01T08:30:00-04:00",
 			result.Created.Format(time.RFC3339),
 		)
+	})
+}
+
+func Test_DTValue(t *testing.T) {
+	dt, _ := NewDateTimeFromString("2023-09-27T13:15:00.000-04:00")
+	str, err := dt.Value()
+	assert.Nil(t, err)
+	assert.Equal(t, "2023-09-27T13:15:00-04:00", str)
+}
+
+func Test_DTScan(t *testing.T) {
+	t.Run("handles nil input", func(t *testing.T) {
+		dt := DateTime{}
+		err := dt.Scan(nil)
+		assert.Nil(t, err)
+	})
+
+	t.Run("only scans strings", func(t *testing.T) {
+		dt := DateTime{}
+		err := dt.Scan(42)
+		assert.ErrorContains(t, err, "value must be a string, got: int")
+	})
+
+	t.Run("empty instance is empty", func(t *testing.T) {
+		expected := DateTime{}
+		source, _ := NewDateTimeFromString("2023-09-27T15:00.000-04:00")
+
+		err := source.Scan("")
+		assert.Nil(t, err)
+		assert.Equal(t, expected, source)
+	})
+
+	t.Run("returns date-time parse error", func(t *testing.T) {
+		dt := DateTime{}
+		err := dt.Scan("2023-09-27 15:00 US/Eastern")
+		assert.ErrorContains(t, err, "input is not a date-time string:")
+	})
+
+	t.Run("scans correctly", func(t *testing.T) {
+		dt := DateTime{}
+		err := dt.Scan("2023-09-27T13:15:00.000-04:00")
+		assert.Nil(t, err)
+		assert.Equal(t, "2023-09-27T13:15:00-04:00", dt.ToString())
 	})
 }

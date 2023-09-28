@@ -1,10 +1,13 @@
 package rfc3339
 
 import (
+	"database/sql/driver"
 	"fmt"
-	"github.com/jsumners/go-reggie"
+	"reflect"
 	"strings"
 	"time"
+
+	"github.com/jsumners/go-reggie"
 )
 
 var fullDateRegex = reggie.MustCompile(
@@ -67,5 +70,40 @@ func (fd *FullDate) UnmarshalJSON(data []byte) error {
 
 	fd.Time = d.Time
 
+	return nil
+}
+
+// Value implements the [driver.Valuer] interface to facilitate
+// storing [FullDate] values as strings in a database.
+func (fd FullDate) Value() (driver.Value, error) {
+	return fd.ToString(), nil
+}
+
+// Scan implements the [sql.Scanner] interface to facilitate reading
+// [FullDate] strings stored in a database.
+func (fd *FullDate) Scan(value any) error {
+	if value == nil {
+		return nil
+	}
+
+	rv := reflect.TypeOf(value)
+	if rv.Name() != "string" {
+		return fmt.Errorf("value must be a string, got: %s", rv.Name())
+	}
+
+	// ConvertValue always coerces to a string and does not return
+	// an error.
+	str, _ := driver.String.ConvertValue(value)
+	if str == "" {
+		*fd = FullDate{}
+		return nil
+	}
+
+	parsed, err := NewFullDateFromString(str.(string))
+	if err != nil {
+		return err
+	}
+
+	*fd = parsed
 	return nil
 }

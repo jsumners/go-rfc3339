@@ -1,11 +1,14 @@
 package rfc3339
 
 import (
+	"database/sql/driver"
 	"fmt"
-	"github.com/jsumners/go-reggie"
 	"log"
+	"reflect"
 	"strings"
 	"time"
+
+	"github.com/jsumners/go-reggie"
 )
 
 var regexParts = []string{
@@ -122,5 +125,40 @@ func (dt *DateTime) UnmarshalJSON(data []byte) error {
 
 	dt.Time = d.Time
 
+	return nil
+}
+
+// Value implements the [driver.Valuer] interface to facilitate
+// storing [DateTime] values as strings in a database.
+func (dt DateTime) Value() (driver.Value, error) {
+	return dt.ToString(), nil
+}
+
+// Scan implements the [sql.Scanner] interface to facilitate reading
+// [DateTime] strings stored in a database.
+func (dt *DateTime) Scan(value any) error {
+	if value == nil {
+		return nil
+	}
+
+	rv := reflect.TypeOf(value)
+	if rv.Name() != "string" {
+		return fmt.Errorf("value must be a string, got: %s", rv.Name())
+	}
+
+	// ConvertValue always coerces to a string and does not return
+	// an error.
+	str, _ := driver.String.ConvertValue(value)
+	if str == "" {
+		*dt = DateTime{}
+		return nil
+	}
+
+	parsed, err := NewDateTimeFromString(str.(string))
+	if err != nil {
+		return err
+	}
+
+	*dt = parsed
 	return nil
 }

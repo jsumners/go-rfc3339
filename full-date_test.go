@@ -2,9 +2,10 @@ package rfc3339
 
 import (
 	"encoding/json"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFullDate_IsFullDateString(t *testing.T) {
@@ -122,5 +123,48 @@ func TestFullDate_UnmarshalJSON(t *testing.T) {
 			"2023-04-01T00:00:00Z",
 			result.Created.Format(time.RFC3339),
 		)
+	})
+}
+
+func Test_FDValue(t *testing.T) {
+	fd, _ := NewFullDateFromString("2023-09-28")
+	str, err := fd.Value()
+	assert.Nil(t, err)
+	assert.Equal(t, "2023-09-28", str)
+}
+
+func Test_FDScan(t *testing.T) {
+	t.Run("handles nil input", func(t *testing.T) {
+		fd := FullDate{}
+		err := fd.Scan(nil)
+		assert.Nil(t, err)
+	})
+
+	t.Run("only scans strings", func(t *testing.T) {
+		fd := FullDate{}
+		err := fd.Scan(42)
+		assert.ErrorContains(t, err, "value must be a string, got: int")
+	})
+
+	t.Run("empty instance is empty", func(t *testing.T) {
+		expected := FullDate{}
+		source, _ := NewFullDateFromString("2023-09-28")
+
+		err := source.Scan("")
+		assert.Nil(t, err)
+		assert.Equal(t, expected, source)
+	})
+
+	t.Run("returns full-date parse error", func(t *testing.T) {
+		fd := FullDate{}
+		err := fd.Scan("2023/09/28")
+		assert.ErrorContains(t, err, "is not a full-date string")
+	})
+
+	t.Run("scans correctly", func(t *testing.T) {
+		fd := FullDate{}
+		err := fd.Scan("2023-09-28")
+		assert.Nil(t, err)
+		assert.Equal(t, "2023-09-28", fd.ToString())
 	})
 }
