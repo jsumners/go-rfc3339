@@ -36,6 +36,16 @@ func IsDateTimeString(input string) bool {
 	return dateTimeRegex.MatchString(input)
 }
 
+// MustParseDateTimeString wraps [NewDateTimeFromString] such that if an error
+// happens it generates a panic.
+func MustParseDateTimeString(input string) DateTime {
+	dt, err := NewDateTimeFromString(input)
+	if err != nil {
+		panic(err)
+	}
+	return dt
+}
+
 // NewDateTimeFromString creates a new [DateTime] instance from an RFC 3339
 // `date-time`  string representation. Note that the maximum precision of
 // fractional seconds is limited to 9 places. This is due to [time.Date]'s

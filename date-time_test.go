@@ -22,6 +22,29 @@ func TestDateTime_IsDateTimeString(t *testing.T) {
 	})
 }
 
+func TestDateTime_MustParseString(t *testing.T) {
+	t.Run("parses without error", func(t *testing.T) {
+		expected := time.Date(
+			2023,
+			time.October,
+			12,
+			8,
+			30,
+			0,
+			0,
+			time.FixedZone("UTC-04:00", -14400),
+		)
+		found := MustParseDateTimeString("2023-10-12T08:30:00.000-04:00")
+		assert.Equal(t, expected, found.Time)
+	})
+
+	t.Run("panics for bad string", func(t *testing.T) {
+		assert.Panics(t, func() {
+			MustParseDateTimeString("2023-10-12")
+		})
+	})
+}
+
 func TestDateTime_NewFromString(t *testing.T) {
 	t.Run("returns error if string does not conform", func(t *testing.T) {
 		dt, err := NewDateTimeFromString("2023-03-24")

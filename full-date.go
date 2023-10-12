@@ -20,6 +20,16 @@ func IsFullDateString(input string) bool {
 	return fullDateRegex.MatchString(input)
 }
 
+// MustParseDateString wraps [NewFullDateFromString] such that if an error
+// happens it generates a panic.
+func MustParseDateString(input string) FullDate {
+	fd, err := NewFullDateFromString(input)
+	if err != nil {
+		panic(err)
+	}
+	return fd
+}
+
 // NewFullDateFromString creates a new [FullDate] instance from an RFC 3339
 // `full-date` string representation. Note that the time parts will be set to
 // 00:00:00.000 at the UTC (+00:00) offset.

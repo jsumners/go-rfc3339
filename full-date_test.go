@@ -20,6 +20,24 @@ func TestFullDate_IsFullDateString(t *testing.T) {
 	})
 }
 
+func TestFullDate_MustParseDateString(t *testing.T) {
+	t.Run("parses without error", func(t *testing.T) {
+		expected := time.Date(
+			2023, time.October, 12,
+			0, 0, 0, 0,
+			time.FixedZone("UTC", 0),
+		)
+		found := MustParseDateString("2023-10-12")
+		assert.Equal(t, expected, found.Time)
+	})
+
+	t.Run("panics for bad string", func(t *testing.T) {
+		assert.Panics(t, func() {
+			MustParseDateString("2023-10")
+		})
+	})
+}
+
 func TestFullDate_NewFromString(t *testing.T) {
 	t.Run("returns error for bad input", func(t *testing.T) {
 		fd, err := NewFullDateFromString("2023/04/03")
