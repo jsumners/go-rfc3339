@@ -3,7 +3,6 @@ package rfc3339
 import (
 	"database/sql/driver"
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
 	"time"
@@ -95,7 +94,6 @@ func NewDateTimeFromString(input string) (DateTime, error) {
 		toInt(hour), toInt(minute), toInt(second), secFrac,
 		location,
 	)
-	log.Println(date.String())
 	dt := DateTime{
 		Time: date,
 	}
