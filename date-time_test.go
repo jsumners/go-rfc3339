@@ -176,6 +176,17 @@ func TestDateTime_UnmarshalJSON(t *testing.T) {
 			result.Created.Format(time.RFC3339),
 		)
 	})
+
+	t.Run("unmarshals zero value correctly", func(t *testing.T) {
+		expected := DateTime{}
+		serialized := fmt.Sprintf(`"%s"`, expected.ToString())
+
+		var found DateTime
+		err := json.Unmarshal([]byte(serialized), &found)
+
+		assert.NoError(t, err)
+		assert.Equal(t, expected, found)
+	})
 }
 
 func Test_DTValue(t *testing.T) {

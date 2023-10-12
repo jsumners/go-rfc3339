@@ -70,6 +70,9 @@ func NewDateTimeFromString(input string) (DateTime, error) {
 		}
 	}
 
+	// Calculate the zone UTC offset in seconds from the provided
+	// offset portion of the string, and convert it into a UTC offset zone
+	// name (https://en.wikipedia.org/wiki/UTC_offset).
 	zHour := toInt(offsetTime[1:3])
 	zMin := toInt(offsetTime[4:6])
 	zOffset := (zHour*60 + zMin) * 60
@@ -77,7 +80,15 @@ func NewDateTimeFromString(input string) (DateTime, error) {
 		zOffset = -1 * zOffset
 	}
 	zoneName := fmt.Sprintf("UTC%s", offsetTime)
-	location := time.FixedZone(zoneName, zOffset)
+
+	// Use the UTC offset zone name to generate a [time.Location] for use
+	// in creating the new instance.
+	var location *time.Location
+	if zoneName == "UTC+00:00" {
+		location = time.UTC
+	} else {
+		location = time.FixedZone(zoneName, zOffset)
+	}
 
 	date := time.Date(
 		toInt(year), time.Month(toInt(month)), toInt(day),
