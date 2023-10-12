@@ -254,3 +254,10 @@ func Test_DTScan(t *testing.T) {
 		assert.Equal(t, "2023-09-27T13:15:00-04:00", dt.ToString())
 	})
 }
+
+func Benchmark_DTScan(b *testing.B) {
+	for i := 0; i < b.N; i += 1 {
+		dt := DateTime{}
+		dt.Scan("2023-10-12T09:00:00.000-04:00")
+	}
+}

@@ -3,7 +3,6 @@ package rfc3339
 import (
 	"database/sql/driver"
 	"fmt"
-	"reflect"
 	"strings"
 	"time"
 
@@ -96,24 +95,22 @@ func (fd *FullDate) Scan(value any) error {
 		return nil
 	}
 
-	rv := reflect.TypeOf(value)
-	if rv.Name() != "string" {
-		return fmt.Errorf("value must be a string, got: %s", rv.Name())
-	}
+	switch value.(type) {
+	case string, []byte:
+		str := value.(string)
+		if str == "" {
+			*fd = FullDate{}
+			return nil
+		}
 
-	// ConvertValue always coerces to a string and does not return
-	// an error.
-	str, _ := driver.String.ConvertValue(value)
-	if str == "" {
-		*fd = FullDate{}
+		parsed, err := NewFullDateFromString(str)
+		if err != nil {
+			return err
+		}
+		*fd = parsed
 		return nil
-	}
 
-	parsed, err := NewFullDateFromString(str.(string))
-	if err != nil {
-		return err
+	default:
+		return fmt.Errorf("value must be a string, got: %T", value)
 	}
-
-	*fd = parsed
-	return nil
 }

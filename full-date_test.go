@@ -186,3 +186,10 @@ func Test_FDScan(t *testing.T) {
 		assert.Equal(t, "2023-09-28", fd.ToString())
 	})
 }
+
+func Benchmark_FDScan(b *testing.B) {
+	for i := 0; i < b.N; i += 1 {
+		fd := FullDate{}
+		fd.Scan("2023-10-12")
+	}
+}

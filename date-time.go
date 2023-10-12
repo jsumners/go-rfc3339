@@ -3,7 +3,6 @@ package rfc3339
 import (
 	"database/sql/driver"
 	"fmt"
-	"reflect"
 	"strings"
 	"time"
 
@@ -160,24 +159,20 @@ func (dt *DateTime) Scan(value any) error {
 		return nil
 	}
 
-	rv := reflect.TypeOf(value)
-	if rv.Name() != "string" {
-		return fmt.Errorf("value must be a string, got: %s", rv.Name())
-	}
-
-	// ConvertValue always coerces to a string and does not return
-	// an error.
-	str, _ := driver.String.ConvertValue(value)
-	if str == "" {
-		*dt = DateTime{}
+	switch value.(type) {
+	case string, []byte:
+		str := value.(string)
+		if str == "" {
+			*dt = DateTime{}
+			return nil
+		}
+		parsed, err := NewDateTimeFromString(str)
+		if err != nil {
+			return err
+		}
+		*dt = parsed
 		return nil
+	default:
+		return fmt.Errorf("value must be a string, got: %T", value)
 	}
-
-	parsed, err := NewDateTimeFromString(str.(string))
-	if err != nil {
-		return err
-	}
-
-	*dt = parsed
-	return nil
 }
