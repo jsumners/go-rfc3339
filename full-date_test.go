@@ -72,6 +72,12 @@ func TestFullDate_ToString(t *testing.T) {
 	})
 }
 
+func TestFullDate_ToDateTime(t *testing.T) {
+	fd, err := NewFullDateFromString("2024-04-06")
+	assert.NoError(t, err)
+	assert.Equal(t, "2024-04-06T00:00:00Z", fd.ToDateTime().ToString())
+}
+
 func TestFullDate_MarshalJSON(t *testing.T) {
 	type j struct {
 		Created FullDate `json:"created"`

@@ -112,6 +112,13 @@ func TestDateTime_ToString(t *testing.T) {
 	assert.Equal(t, expected, dt.ToString())
 }
 
+func TestDateTime_ToFullDate(t *testing.T) {
+	dateString := "2024-04-06T11:15:00.000-04:00"
+	dt, err := NewDateTimeFromString(dateString)
+	require.NoError(t, err)
+	assert.Equal(t, "2024-04-06", dt.ToFullDate().ToString())
+}
+
 func TestDateTime_MarshalJSON(t *testing.T) {
 	type j struct {
 		Created DateTime `json:"created"`

@@ -121,6 +121,13 @@ func (dt DateTime) ToString() string {
 	return dt.Format(time.RFC3339Nano)
 }
 
+// ToFullDate provides a convenient way to convert a [DateTime] to a [FullDate].
+func (dt DateTime) ToFullDate() FullDate {
+	return FullDate{
+		Time: dt.Time,
+	}
+}
+
 func (dt DateTime) MarshalJSON() ([]byte, error) {
 	if dt.IsZero() {
 		return []byte("null"), nil

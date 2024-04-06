@@ -58,6 +58,14 @@ func (fd FullDate) ToString() string {
 	return fmt.Sprintf("%04d-%02d-%02d", fd.Year(), fd.Month(), fd.Day())
 }
 
+// ToDateTime is a convenient way to convert a [FullDate] to a [DateTime].
+// Note: the [DateTime] will have its time portion set to 00:00:00 at UTC.
+func (fd FullDate) ToDateTime() DateTime {
+	return DateTime{
+		Time: fd.Time,
+	}
+}
+
 func (fd FullDate) MarshalJSON() ([]byte, error) {
 	if fd.IsZero() {
 		return []byte("null"), nil
